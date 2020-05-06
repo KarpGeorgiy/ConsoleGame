@@ -2,26 +2,27 @@
 #include <conio.h>
 #include <windows.h>
 
-#define fieldHeight 40
-#define fieldWidth 80
+#define fieldHeight 25
+#define fieldWidth 50
 
 using namespace std;
 
 int score = 0;
-int difficulty = 0;
+int difficulty = 50;
 bool gameIsOver = false;
 char field[fieldHeight][fieldWidth];
 int playerPosition = 9;
 int boardLength = 6, boardLevel = fieldHeight-4;
 char command;
 int HorizontalDirection = 1, VerticalDirection = 1;
-int Xposition = 5, Yposition = 5;
+int Xposition = playerPosition+2, Yposition = boardLevel-1;
+int aimArray[fieldHeight][fieldWidth];
 
 void CreateField();
 void Draw();
 void PlayerMove(char command);
-void BallMove();
 void BallLogic();
+void fillAimArray();
 
 int main()
 {
@@ -37,17 +38,17 @@ int main()
 	COORD start;
 	start.X = 0;
 	start.Y = 0;
+	fillAimArray();
 	system("pause");
 	while (!gameIsOver)
 	{
 		Sleep(difficulty);
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), start);
-		CreateField();
-		Draw();
 		if (_kbhit()) command = _getch();
 		PlayerMove(command);
-		//command = ' ';
-		BallMove();
+		BallLogic();
+		CreateField();
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), start);
+		Draw();
 	}
 }
 
@@ -57,7 +58,9 @@ void CreateField()
 	{
 		for (int j = 0; j < fieldWidth; j++)
 		{
-			field[i][j] = ' ';
+			if (aimArray[i][j] == 1) field[i][j] = '-';
+			else field[i][j] = ' ';
+			
 		}
 	}
 
@@ -97,11 +100,67 @@ void PlayerMove(char command)
 	}
 }
 
-void BallMove()
+void BallLogic()
 {
-	if (Yposition == boardLevel - 1 && Xposition >= playerPosition-1 && Xposition <= playerPosition + boardLength) VerticalDirection = -1;
-	if (Yposition == boardLevel + 1 && Xposition >= playerPosition-1 && Xposition <= playerPosition + boardLength) VerticalDirection = 1;
+	// Отталкивание от платформы
+	if (Yposition == boardLevel - 1 && Xposition >= playerPosition - 1 && Xposition <= playerPosition + boardLength) VerticalDirection = -1;
+	if (Yposition == boardLevel + 1 && Xposition >= playerPosition - 1 && Xposition <= playerPosition + boardLength) VerticalDirection = 1;
+	if (Yposition == boardLevel && Xposition == playerPosition + boardLength) VerticalDirection = 1;
+	if (Yposition == boardLevel && Xposition == playerPosition) VerticalDirection = -1;
+	if (Yposition == boardLevel - 1 && Xposition == playerPosition - 1) {
+		VerticalDirection = -1; HorizontalDirection = -1;
+	}
+	if (Yposition == boardLevel - 1 && Xposition == playerPosition + boardLength) {
+		VerticalDirection = -1; HorizontalDirection = 1;
+	}
+	if (Yposition == boardLevel + 1 && Xposition == playerPosition - 1) {
+		VerticalDirection = 1; HorizontalDirection = -1;
+	}
+	if (Yposition == boardLevel + 1 && Xposition == playerPosition + boardLength) {
+		VerticalDirection = 1; HorizontalDirection = 1;
+	}
 
+	// Взаимодействие с целью
+	if (aimArray[Yposition - 1][Xposition] == 1)
+	{
+		VerticalDirection = 1;
+		aimArray[Yposition - 1][Xposition] = 0;
+		score++;
+	}
+	if (aimArray[Yposition + 1][Xposition] == 1)
+	{
+		VerticalDirection = -1;
+		aimArray[Yposition + 1][Xposition] = 0;
+		score++;
+	}
+	if (aimArray[Yposition][Xposition - 1] == 1)
+	{
+		HorizontalDirection = 1;
+		aimArray[Yposition][Xposition - 1] = 0;
+		score++;
+	}
+	if (aimArray[Yposition][Xposition + 1] == 1)
+	{
+		HorizontalDirection = -1;
+		aimArray[Yposition][Xposition + 1] = 0;
+		score++;
+	}
+	if (aimArray[Yposition + 1][Xposition + 1] == 1)
+	{
+		HorizontalDirection = -1;
+		VerticalDirection = -1;
+		aimArray[Yposition + 1][Xposition + 1] = 0;
+		score++;
+	}
+	if (aimArray[Yposition - 1][Xposition - 1] == 1)
+	{
+		HorizontalDirection = 1;
+		VerticalDirection = 1;
+		aimArray[Yposition - 1][Xposition - 1] = 0;
+		score++;
+	}
+
+	// Движение мячика
 	if (Xposition < fieldWidth && HorizontalDirection == 1)	Xposition++;
 	if (Xposition > 0 && HorizontalDirection == -1)	Xposition--;
 	if (Xposition == fieldWidth) HorizontalDirection = -1;
@@ -111,4 +170,16 @@ void BallMove()
 	if (Yposition > 0 && VerticalDirection == -1)	Yposition--;
 	if (Yposition == fieldHeight) VerticalDirection = -1;
 	if (Yposition == 0) VerticalDirection = 1;
+}
+
+void fillAimArray()
+{
+	for (int i = 0; i < fieldHeight; i++)
+	{
+		for (int j = 0; j < fieldWidth; j++)
+		{
+			if (i < fieldHeight/3) aimArray[i][j] = 1;
+			else aimArray[i][j] = 0;
+		}
+	}
 }
