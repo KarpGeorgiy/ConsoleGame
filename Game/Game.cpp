@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <conio.h>
 #include <windows.h>
+#include <time.h>
 
 #define fieldHeight 25
 #define fieldWidth 50
@@ -8,7 +9,8 @@
 using namespace std;
 
 int score = 0;
-int difficulty = 50;
+int maxScore = 0;
+int difficulty = 0;
 bool gameIsOver = false;
 char field[fieldHeight][fieldWidth];
 int playerPosition = 9;
@@ -18,6 +20,8 @@ int HorizontalDirection = 1, VerticalDirection = 1;
 int Xposition = playerPosition+2, Yposition = boardLevel-1;
 int aimArray[fieldHeight][fieldWidth];
 int aimLevel = fieldHeight / 3;
+
+time_t start_while, end_while;
 
 void CreateField();
 void Draw();
@@ -43,30 +47,19 @@ int main()
 	system("pause");
 	while (!gameIsOver)
 	{
+		time(&start_while);
+		if (score >= maxScore) break;
 		Sleep(difficulty);
 		if (_kbhit()) command = _getch();
 		PlayerMove(command);
 		BallLogic();
-		CreateField();
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), start);
 		Draw();
+		time(&end_while);
+		cout << "   Time of execute " << difftime(end_while, start_while);
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), start);
 	}
-}
-
-void CreateField()
-{
-	for (int i = 0; i < fieldHeight; i++)
-	{
-			for (int j = 0; j < fieldWidth; j++)
-			{
-				if (aimArray[i][j] == 1) field[i][j] = '-';
-				else field[i][j] = ' ';
-
-			}
-	}
-
-	for (int i = playerPosition; i <= playerPosition + boardLength - 1; i++)	field[boardLevel][i] = '=';
-	field[Yposition][Xposition] = '+';
+	cout << "You Win!!!";
+	system("pause");
 }
 
 void Draw()
@@ -75,15 +68,22 @@ void Draw()
 	cout << endl;
 	for (int i = 0; i < fieldHeight; i++)
 	{
+		if (i == Yposition || i == Yposition-1 || i == Yposition+1 || i <= boardLevel)
+		{
 			for (int j = 0; j < fieldWidth; j++)
 			{
+				if (aimArray[i][j] == 1) field[i][j] = '-';
+				else if (i == Yposition && j == Xposition) field[i][j] = '+';
+				else if (i == boardLevel && j >= playerPosition && j <= playerPosition + boardLength - 1) field[i][j] = '=';
+				else field[i][j] = ' ';
 				cout << field[i][j];
 			}
-			cout << endl;
+		}
+		cout << endl;
 	}
 	for (int i = 0; i < fieldWidth; i++) cout << "^";
 	cout << endl;
-	cout << "Score: " << score;
+	cout << "Score: " << score << "   Aim: " << maxScore;
 }
 
 void PlayerMove(char command)
@@ -179,7 +179,10 @@ void fillAimArray()
 	{
 		for (int j = 0; j < fieldWidth; j++)
 		{
-			if (i < aimLevel) aimArray[i][j] = 1;
+			if (i < aimLevel) {
+				aimArray[i][j] = 1;
+				maxScore++;
+			}
 			else aimArray[i][j] = 0;
 		}
 	}
