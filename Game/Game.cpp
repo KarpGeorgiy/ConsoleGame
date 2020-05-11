@@ -17,6 +17,7 @@ char command;
 int HorizontalDirection = 1, VerticalDirection = 1;
 int Xposition = playerPosition+2, Yposition = boardLevel-1;
 int aimArray[fieldHeight][fieldWidth];
+int aimLevel = fieldHeight / 3;
 
 void CreateField();
 void Draw();
@@ -56,12 +57,12 @@ void CreateField()
 {
 	for (int i = 0; i < fieldHeight; i++)
 	{
-		for (int j = 0; j < fieldWidth; j++)
-		{
-			if (aimArray[i][j] == 1) field[i][j] = '-';
-			else field[i][j] = ' ';
-			
-		}
+			for (int j = 0; j < fieldWidth; j++)
+			{
+				if (aimArray[i][j] == 1) field[i][j] = '-';
+				else field[i][j] = ' ';
+
+			}
 	}
 
 	for (int i = playerPosition; i <= playerPosition + boardLength - 1; i++)	field[boardLevel][i] = '=';
@@ -74,11 +75,11 @@ void Draw()
 	cout << endl;
 	for (int i = 0; i < fieldHeight; i++)
 	{
-		for (int j = 0; j < fieldWidth; j++)
-		{
-			cout << field[i][j];
-		}
-		cout << endl;
+			for (int j = 0; j < fieldWidth; j++)
+			{
+				cout << field[i][j];
+			}
+			cout << endl;
 	}
 	for (int i = 0; i < fieldWidth; i++) cout << "^";
 	cout << endl;
@@ -178,7 +179,7 @@ void fillAimArray()
 	{
 		for (int j = 0; j < fieldWidth; j++)
 		{
-			if (i < fieldHeight/3) aimArray[i][j] = 1;
+			if (i < aimLevel) aimArray[i][j] = 1;
 			else aimArray[i][j] = 0;
 		}
 	}
