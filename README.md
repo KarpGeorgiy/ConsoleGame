@@ -1,2 +1,2 @@
 # ConsoleGame
-Few console games
+Ping pong
