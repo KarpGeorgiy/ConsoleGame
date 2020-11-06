@@ -14,7 +14,7 @@ int difficulty = 0;
 bool gameIsOver = false;
 char field[fieldHeight][fieldWidth];
 int playerPosition = 9;
-int boardLength = 6, boardLevel = fieldHeight-4;
+int boardLength = 6, boardLevel = fieldHeight-2;
 char command;
 int HorizontalDirection = 1, VerticalDirection = 1;
 int Xposition = playerPosition+2, Yposition = boardLevel-1;
